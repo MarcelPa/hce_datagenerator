@@ -13,9 +13,6 @@ from openpyxl.styles import PatternFill
 
 def create_patients(fake: Faker, n: int) -> List[Dict[str, Any]]:
     ''' Generate a list of n patients. '''
-    # get today to calculate visit dates
-    today = datetime.date.today()
-
     patients = []
     for i in range(n):
         profile = fake.simple_profile()
@@ -23,7 +20,6 @@ def create_patients(fake: Faker, n: int) -> List[Dict[str, Any]]:
         patients.append({
             'naam': profile['name'],
             'patient_id': f'{(i+1) * 41232 % 100003:05d}', # a seemingly random, non consecutive patient id
-            'datum': (today - datetime.timedelta(days=random.randint(1, 160))).isoformat(),
             'geboortedatum': profile['birthdate'].isoformat(),
             'straat': address[0],
             'stad': ' '.join(address[1:]),
@@ -32,10 +28,13 @@ def create_patients(fake: Faker, n: int) -> List[Dict[str, Any]]:
 
 def generate_record(samples: Dict[str, Any], fake: Faker) -> Dict[str, Any]:
     ''' Generate a record containing a random sample using Faker. '''
+    # get today to calculate visit dates
+    today = datetime.date.today()
 
     # start and populate a new record
     record = {}
     sample_type = random.choice(list(samples.keys()))
+    record['datum'] = (today - datetime.timedelta(days=random.randint(1, 120))).isoformat()
     record['type'] = sample_type
     record['genomen'], record['ingang'] = sorted((fake.time(), fake.time()))
     record = record | samples[sample_type]()
